@@ -9,8 +9,6 @@ import (
 	"strconv"
 	"time"
 
-	dac "github.com/xinsnake/go-http-digest-auth-client"
-
 	"github.com/openfresh/wse-rest-library-go/entity/application/helper"
 	"github.com/openfresh/wse-rest-library-go/entity/base"
 )
@@ -128,14 +126,33 @@ func (w *wowza) sendRequest(props map[string]interface{}, entities []base.Entity
 		req.Header.Add("Accept", "application/json; charset=utf-8")
 		req.Header.Add("Content-type", "application/json; charset=utf-8")
 		req.Header.Add("Content-Length", strconv.Itoa(len(jsonb)))
-		var resp *http.Response
-		if w.settings.IsUseDigest() {
-			t := dac.NewTransport(w.settings.Username(), w.settings.Password())
-			resp, err = t.RoundTrip(req)
-			if err != nil {
+		resp, err := client.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		if w.settings.IsUseDigest() && resp.StatusCode == http.StatusUnauthorized {
+			resp.Body.Close()
+			var (
+				auth     *authorization
+				wa       *wwwAuthenticate
+				waString string
+			)
+			if waString = resp.Header.Get("WWW-Authenticate"); waString == "" {
+				return nil, fmt.Errorf("failed to get WWW-Authenticate header, please check your server configuration")
+			}
+			wa = newWwwAuthenticate(waString)
+			dr := new(digestRequest)
+			dr.UpdateRequest(w.settings.Username(), w.settings.Password(), verbType.String(), restURI, string(jsonb))
+			dr.CertVal = true
+			dr.Wa = wa
+			if auth, err = newAuthorization(dr); err != nil {
 				return nil, err
 			}
-		} else {
+			req, err = http.NewRequest(verbType.String(), restURI, bytes.NewReader(jsonb))
+			req.Header.Add("Accept", "application/json; charset=utf-8")
+			req.Header.Add("Content-type", "application/json; charset=utf-8")
+			req.Header.Add("Content-Length", strconv.Itoa(len(jsonb)))
+			req.Header.Add("Authorization", auth.toString())
 			resp, err = client.Do(req)
 			if err != nil {
 				return nil, err

@@ -10,6 +10,7 @@ func TestStreamfile(t *testing.T) {
 	// Create settings
 	settings := helper.NewDefaultSettings()
 	settings.SetHost(WowzaHost)
+	settings.SetUseDigest(true)
 	settings.SetUsername(WowzaUsername)
 	settings.SetPassword(WowzaPassword)
 

@@ -29,6 +29,7 @@ func Example() {
 	// It is simple to create a setup object for transporting our settings
 	setup := helper.NewDefaultSettings()
 	setup.SetHost(WowzaHost)
+	setup.SetUseDigest(true)
 	setup.SetUsername(WowzaUsername)
 	setup.SetPassword(WowzaPassword)
 
