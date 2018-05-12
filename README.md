@@ -19,10 +19,11 @@ Then import it:
 	// It is simple to create a setup object for transporting our settings
 	setup := helper.NewDefaultSettings()
 	setup.SetHost(WowzaHost)
+	setup.SetUseDigest(true)
 	setup.SetUsername(WowzaUsername)
 	setup.SetPassword(WowzaPassword)
 
-	// Connect to the server or deal with statistics NOTICE THE CAPS IN COM AND WOWZA
+	// Connect to the server or deal with statistics
 	server := wserest.NewServer(setup)
 	sf := wserest.NewStatistics(setup)
 
