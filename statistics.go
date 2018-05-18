@@ -36,6 +36,9 @@ func (s *Statistics) GetApplicationStatisticsHistory(application *Application) (
 
 // GetIncomingApplicationStatistics retrieves the Current Incoming Stream statistics for the specifed Incoming Stream
 func (s *Statistics) GetIncomingApplicationStatistics(application *Application, streamName string, appInstance string) (map[string]interface{}, error) {
+	if appInstance == "" {
+		appInstance = "_definst_"
+	}
 	s.setRestURI(application.baseURI + "/instances/" + appInstance + "/incomingstreams/" + streamName + "/monitoring/current")
 
 	return s.sendRequest(s.preparePropertiesForRequest(), []base.Entity{}, GET, "")

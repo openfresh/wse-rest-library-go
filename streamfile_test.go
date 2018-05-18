@@ -38,7 +38,7 @@ func TestStreamfile(t *testing.T) {
 		"streamTimeout":      "1100",
 		"rtspSessionTimeout": "600",
 	}
-	response, err = sf.Update(urlProps, "", "")
+	response, err = sf.Update(urlProps)
 	if err != nil {
 		t.Fatal(err)
 	}

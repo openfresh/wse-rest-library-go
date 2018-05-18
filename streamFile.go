@@ -49,6 +49,14 @@ func (s *StreamFile) GetAll() (map[string]interface{}, error) {
 
 // Create adds the specified Stream File configuration
 func (s *StreamFile) Create(urlProps map[string]string, mediaCasterType string, applicationInstance string) (map[string]interface{}, error) {
+	if mediaCasterType == "" {
+		mediaCasterType = "rtp"
+	}
+	if applicationInstance == "" {
+		applicationInstance = "_definst_"
+	}
+	s.mediaCasterType = mediaCasterType
+	s.applicationInstance = applicationInstance
 	sf := application.NewStreamFiles()
 	sf.ID = "connectAppName=" + s.applicationName + "&appInstance=" + applicationInstance + "&mediaCasterType=" + mediaCasterType
 	sf.Href = s.baseURI + "/streamfiles/" + sf.ID
@@ -87,7 +95,7 @@ func (s *StreamFile) getAdvancedSettings(urlProps map[string]string) []*helper.A
 }
 
 // Update updates the Advanced Stream File configuration
-func (s *StreamFile) Update(urlProps map[string]string, mediaCasterType string, applicationInstance string) (map[string]interface{}, error) {
+func (s *StreamFile) Update(urlProps map[string]string) (map[string]interface{}, error) {
 	s.setRestURI(s.baseURI + "/" + s.props["name"].(string))
 	items := s.getAdvancedSettings(urlProps)
 
@@ -135,8 +143,8 @@ func (s *StreamFile) Disconnect() (map[string]interface{}, error) {
 	//	s.AddAdditionalParameter("appInstance", s.applicationInstance)
 	//	s.AddAdditionalParameter("mediaCasterType", s.mediaCasterType)
 
-	s.setRestURI(s.host() + "/servers/" + s.serverInstance() + "/vhosts/" + s.vHostInstance() + "/applications/" + s.applicationName + "/instances/")
-	s.setRestURI(s.baseURI + s.applicationInstance + "/incomingstreams/" + s.props["name"].(string) + ".stream/actions/disconnectStream")
+	baseURI := s.host() + "/servers/" + s.serverInstance() + "/vhosts/" + s.vHostInstance() + "/applications/" + s.applicationName + "/instances/"
+	s.setRestURI(baseURI + s.applicationInstance + "/incomingstreams/" + s.props["name"].(string) + ".stream/actions/disconnectStream")
 
 	return s.sendRequest(s.preparePropertiesForRequest(), []base.Entity{}, PUT, "")
 }
