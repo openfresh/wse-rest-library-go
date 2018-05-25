@@ -20,7 +20,7 @@ type StreamFile struct {
 func NewStreamFile(settings *helper.Settings, appName, streamFileName string) *StreamFile {
 	s := new(StreamFile)
 	s.init(settings)
-	s.baseURI = s.host() + "/servers/" + s.serverInstance() + "/vhosts/" + s.vHostInstance() + "/streamfiles"
+	s.baseURI = s.host() + "/servers/" + s.serverInstance() + "/vhosts/" + s.vHostInstance() + "/applications/" + appName + "/streamfiles"
 
 	if appName != "" {
 		s.applicationName = appName
@@ -136,9 +136,7 @@ func (s *StreamFile) Connect(subFolder string) (map[string]interface{}, error) {
 		streamFilePath = s.props["name"].(string)
 	}
 
-	baseURI := s.host() + "/servers/" + s.serverInstance() + "/vhosts/" + s.vHostInstance() + "/applications/" + s.applicationName + "/streamfiles"
-
-	s.setRestURI(baseURI + "/" + streamFilePath + "/actions/connect")
+	s.setRestURI(s.baseURI + "/" + streamFilePath + "/actions/connect")
 
 	return s.sendRequest(s.preparePropertiesForRequest(), []base.Entity{}, PUT,
 		"connectAppName="+s.applicationName+"&appInstance="+s.applicationInstance+"&mediaCasterType="+s.mediaCasterType)
