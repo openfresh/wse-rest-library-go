@@ -1,6 +1,8 @@
 package wserest
 
 import (
+	"strconv"
+
 	"github.com/openfresh/wse-rest-library-go/entity/application/helper"
 	"github.com/openfresh/wse-rest-library-go/entity/base"
 )
@@ -45,12 +47,23 @@ func (p *Publisher) Remove() (map[string]interface{}, error) {
 	return p.sendRequest(p.preparePropertiesForRequest(), []base.Entity{}, DELETE, "")
 }
 
-func (p *Publisher) getAdvancedSettings(urlProps map[string]string) []*helper.AdvancedSettingItem {
+func (p *Publisher) getAdvancedSettings(urlProps map[string]interface{}) []*helper.AdvancedSettingItem {
 	items := make([]*helper.AdvancedSettingItem, 0)
 	for k, v := range urlProps {
 		item := helper.NewAdvancedSettingItem()
 		item.Name = k
-		item.Value = v
+		switch t := v.(type) {
+		default:
+		case bool:
+			item.Value = strconv.FormatBool(t)
+			item.Type = "Boolean"
+		case int:
+			item.Value = strconv.Itoa(t)
+			item.Type = "Integer"
+		case string:
+			item.Value = t
+			item.Type = "String"
+		}
 		items = append(items, item)
 	}
 

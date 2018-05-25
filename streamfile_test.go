@@ -20,10 +20,10 @@ func TestStreamfile(t *testing.T) {
 		return
 	}
 
-	urlProps := map[string]string{
+	urlProps := map[string]interface{}{
 		"uri":                "rtsp://localhost/vod/mp4:BigBuckBunny_115k.mov",
-		"streamTimeout":      "1200",
-		"rtspSessionTimeout": "800",
+		"streamTimeout":      1200,
+		"rtspSessionTimeout": 800,
 	}
 
 	response, err := sf.Create(urlProps, "rtp", "")
@@ -33,10 +33,10 @@ func TestStreamfile(t *testing.T) {
 	t.Log(response)
 
 	// Complete an update on the stream file
-	urlProps = map[string]string{
+	urlProps = map[string]interface{}{
 		"uri":                "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_115k.mov",
-		"streamTimeout":      "1100",
-		"rtspSessionTimeout": "600",
+		"streamTimeout":      1100,
+		"rtspSessionTimeout": 600,
 	}
 	response, err = sf.Update(urlProps)
 	if err != nil {

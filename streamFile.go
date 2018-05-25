@@ -1,6 +1,8 @@
 package wserest
 
 import (
+	"strconv"
+
 	"github.com/openfresh/wse-rest-library-go/entity/application"
 	"github.com/openfresh/wse-rest-library-go/entity/application/helper"
 	"github.com/openfresh/wse-rest-library-go/entity/base"
@@ -48,7 +50,7 @@ func (s *StreamFile) GetAll() (map[string]interface{}, error) {
 }
 
 // Create adds the specified Stream File configuration
-func (s *StreamFile) Create(urlProps map[string]string, mediaCasterType string, applicationInstance string) (map[string]interface{}, error) {
+func (s *StreamFile) Create(urlProps map[string]interface{}, mediaCasterType string, applicationInstance string) (map[string]interface{}, error) {
 	if mediaCasterType == "" {
 		mediaCasterType = "rtp"
 	}
@@ -82,12 +84,23 @@ func (s *StreamFile) addURL(advancedSettings []*helper.AdvancedSettingItem) (map
 	return s.sendRequest(s.preparePropertiesForRequest(), []base.Entity{}, PUT, "")
 }
 
-func (s *StreamFile) getAdvancedSettings(urlProps map[string]string) []*helper.AdvancedSettingItem {
+func (s *StreamFile) getAdvancedSettings(urlProps map[string]interface{}) []*helper.AdvancedSettingItem {
 	items := make([]*helper.AdvancedSettingItem, 0)
 	for k, v := range urlProps {
 		item := helper.NewAdvancedSettingItem()
 		item.Name = k
-		item.Value = v
+		switch t := v.(type) {
+		default:
+		case bool:
+			item.Value = strconv.FormatBool(t)
+			item.Type = "Boolean"
+		case int:
+			item.Value = strconv.Itoa(t)
+			item.Type = "Integer"
+		case string:
+			item.Value = t
+			item.Type = "String"
+		}
 		items = append(items, item)
 	}
 
@@ -95,7 +108,7 @@ func (s *StreamFile) getAdvancedSettings(urlProps map[string]string) []*helper.A
 }
 
 // Update updates the Advanced Stream File configuration
-func (s *StreamFile) Update(urlProps map[string]string) (map[string]interface{}, error) {
+func (s *StreamFile) Update(urlProps map[string]interface{}) (map[string]interface{}, error) {
 	s.setRestURI(s.baseURI + "/" + s.props["name"].(string))
 	items := s.getAdvancedSettings(urlProps)
 
@@ -123,7 +136,9 @@ func (s *StreamFile) Connect(subFolder string) (map[string]interface{}, error) {
 		streamFilePath = s.props["name"].(string)
 	}
 
-	s.setRestURI(s.baseURI + "/" + streamFilePath + "/actions/connect")
+	baseURI := s.host() + "/servers/" + s.serverInstance() + "/vhosts/" + s.vHostInstance() + "/applications/" + s.applicationName + "/streamfiles"
+
+	s.setRestURI(baseURI + "/" + streamFilePath + "/actions/connect")
 
 	return s.sendRequest(s.preparePropertiesForRequest(), []base.Entity{}, PUT,
 		"connectAppName="+s.applicationName+"&appInstance="+s.applicationInstance+"&mediaCasterType="+s.mediaCasterType)
